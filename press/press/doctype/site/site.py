@@ -540,7 +540,7 @@ class Site(Document):
 
 	@frappe.whitelist()
 	def archive(self, reason=None):
-		if self.archived:
+		if self.archived and self.status != "Pending":
 			if self.status == "Archived":
 				frappe.throw("Site is already archived")
 			else:
