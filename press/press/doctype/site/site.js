@@ -87,16 +87,16 @@ frappe.ui.form.on('Site', {
 			);
 		});
 		[
-			[__('Archive'), 'archive'],
-			[__('Cleanup after Archive'), 'cleanup_after_archive'],
-			[__('Migrate'), 'migrate'],
+			[__('Archive'), 'archive', (frm.doc.status != "Archived")],
+			[__('Cleanup after Archive'), 'cleanup_after_archive', (frm.doc.status == "Archived")],
+			[__('Migrate'), 'migrate', (frm.doc.status != "Archived")],
 			[__('Reinstall'), 'reinstall'],
-			[__('Restore'), 'restore_site'],
+			[__('Restore'), 'restore_site', (frm.doc.status != "Archived")],
 			[__('Restore Tables'), 'restore_tables'],
 			[__('Clear Cache'), 'clear_site_cache'],
-			[__('Update'), 'schedule_update'],
-			[__('Deactivate'), 'deactivate'],
-			[__('Activate'), 'activate'],
+			[__('Update'), 'schedule_update', (frm.doc.status != "Archived")],
+			[__('Deactivate'), 'deactivate', (frm.doc.status != "Archived")],
+			[__('Activate'), 'activate', (frm.doc.status != "Archived")],
 			[__('Enable Database Access'), 'enable_database_access', !frm.doc.is_database_access_enabled],
 			[__('Disable Database Access'), 'disable_database_access', frm.doc.is_database_access_enabled],
 			[__('Create DNS Record'), 'create_dns_record'],

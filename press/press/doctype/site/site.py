@@ -540,6 +540,12 @@ class Site(Document):
 
 	@frappe.whitelist()
 	def archive(self, reason=None):
+		if self.archived:
+			if self.status == "Archived":
+				frappe.throw("Site is already archived")
+			else:
+				frappe.throw("Site Archive Job is in progress")
+		self.archived = 1
 		log_site_activity(self.name, "Archive", reason)
 		agent = Agent(self.server)
 		self.status = "Pending"
