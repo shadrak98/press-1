@@ -163,6 +163,7 @@ class Site(Document, TagHelpers):
 		only_update_at_specified_time: DF.Check
 		physical_backup_times: DF.Table[SiteBackupTime]
 		plan: DF.Link | None
+		post_trial: DF.Link | None
 		remote_config_file: DF.Link | None
 		remote_database_file: DF.Link | None
 		remote_private_file: DF.Link | None
@@ -2196,7 +2197,12 @@ class Site(Document, TagHelpers):
 		from press.api.site import validate_plan
 
 		validate_plan(self.server, plan)
-		self.change_plan(plan)
+		if self.trial_end_date >= frappe.utils.getdate():
+			self.post_trial = plan
+			self.save()
+			self.reload()
+		else:
+			self.change_plan(plan)
 
 	def change_plan(self, plan, ignore_card_setup=False):
 		self.can_change_plan(ignore_card_setup)
@@ -4080,6 +4086,22 @@ def _get_apps_of_bench(version, bench):
 			app.update(marketplace_details)
 			app.plans = get_plans_for_app(app.app, version)
 	return apps
+
+
+def upgrade_trial_site_plans():
+	sites = frappe.get_all(
+		"Site",
+		{
+			"trial_end_date": ("<", frappe.utils.today()),
+			"post_trial": ("is", "set"),
+			"status": ("in", ["Active", "Suspended"]),
+			"plan": ("like", "%Trial%"),
+		},
+		["name", "post_trial"],
+		limit=50,
+	)
+	for site in sites:
+		frappe.get_doc("Site", site.name).change_plan(site.post_trial)
 
 
 def sync_sites_setup_wizard_complete_status():
